@@ -23,11 +23,11 @@
 
 
 
-/* 데이터형 정의 */
+/* 데이터형 정의 */     //필요에따라 Data type of Item을 수정해서 사용.
 typedef int Item;                       //Stack의 각 노드가 저장하는 정보(Item)의 데이터형. 구현하고자 하는 프로그램에 맞춰서 적절하게 데이터 타입을 변경해서 사용하면 됨.
 
 typedef struct node {                          //Stack을 구성하는 노드
-    Item item;                          //저장된정보
+    Item item;                                   //저장된정보
     struct node * prev;                        //이전에 입력된 노드를 가리키는 포인터.
 } Node;                              
 
@@ -64,8 +64,13 @@ int StackItemCount(const Stack * pstack);
 
 /* 연산 : 노드 생성, 생성한 노드에 원하는 Item입력, Stack에 집어넣음 */
 /* 사전 조건 : pstack은 스택을 가리킨다. (pointer of stack), si는 stack item즉 저장할 정보를 가리킨다.*/
-/* 사후 조건 : 트리에 항목을 추가하고 성공하면 true 실패하면 false */
-bool AddNode(Stack * pstack, Item si);              
+/* 사후 조건 : Stack에 항목을 추가하고 성공하면 true 실패하면 false */
+bool Push(Stack * pstack, Item si);              
+
+/* 연산 : POP연산. 현재 스택의 Head Node즉 가장 최근에 Stack에 Push된 Node를 꺼낸다. */
+/* 사전 조건 : pstack은 스택을 가리킨다. (pointer of stack)*/
+/* 사후 조건 : Head Node가 가리키던 노드(출력 2순위)가 Head Node가 된다. 리턴값 없음*/
+void POP(Stack * pstack);
 
 /* 연산 : 원하는 정보를 가진 노드를 삭제 */
 /* 사전 조건 : pstack은 스택을 가리킨다. (pointer of stack), si는 stack item (삭제하고자 하는 정보) */
@@ -80,7 +85,7 @@ void DeleteAll(Stack * pstack);                                     //수정된 
 /* 연산 : 원하는 item이 들어있는 node를 스택에서 찾아서 값을 출력한다. */
 /* 사전 조건 : pstack은 미리 초기화된 스택을 가리킨다,si는 stack item  */
 /* 사후 조건 : 원하는 정보를 저장된 노드의 값을 끄집어 낸다. (값이 없으면 없다고 알림.) */
-void ShowNode(Stack * pstack, Item si);
+void InStack(Stack * pstack, Item si);
 
 /* 연산 : 스택에 저장된 정보 전체 출력 */
 /* 사전 조건 : pstack은 스택을 가리킨다. (pointer of stack) */
@@ -101,7 +106,14 @@ void Traverse(Node * pnode, void (* pfun)(Item n));
 bool GetItem(Item *);
 #endif
 /*
-void Traverse(Node * pnode, void (*pfun)(int n))
+void Traverse(Node * pnode, void (*pfun)(int n)
 void (*pfun)(int n)     -->  리턴값이 없고 int형을 전달인자로 가지는 함수를 가리키는 포인터 pfun
 void *pfun (int n)      --> 범용 포인터를 리턴하고 int형을 전달인자로 가지는 함수 pfun
+*/
+
+
+/*
+2023년 12월 6일(수) - Traverse()
+첫번째 전달인자로 다른 인터페이스 구성 연산 함수들 처럼 Node * 보단 Stack * 로 맞추자.
+Traverse()는 함수 구현을 recursion을 이용해서 했기 때문에 힘들꺼같은디 .......?
 */
