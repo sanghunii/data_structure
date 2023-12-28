@@ -10,7 +10,8 @@
 /* 내부 지원 함수 프로토타입 */
 static Node * searching(const Stack *, Item);    //Stack에서 원하는 정보를 가진 노드를 찾아서 그 노드의 주소를 리턴. (입력된 순서 역순으로 하나씩 뒤져봐야함.)
 static Node * makenode(Item item);          //새로운 노드를 만들어서 그 노드에 정보(item)을 저장하고 그 노드의 주소를 리턴.
-static Node * findparent(const Stack *, Item);    //그 노드를 가리키는 노드를 찾는다. 
+static Node * findparent(const Stack *, Item);    //그 노드를 가리키는 노드를 찾는다.
+static bool AddNode(Stack * pstack, Node * new_node);                       
 inline static void empty(void);                 //버퍼를 비우는 인라인 함수.
 
 /* ****caution ***** */
@@ -43,57 +44,48 @@ int StackItemCount(const Stack * pstack)                //현재 스택에 들�
 }
 
 
-/* 코드 유지/보수 일지 */
-/********* 11월 8일(수)  --> AddNode() 전면 수정 필요함. ********/
-/*
-1. Item 입력과 AddNode 작업 분리해야함
-    --> 전달인자를 2개로 (사용할 스택, 저장할 Item)
-    --> 입력은 main()에서 AddNode는 전달받은 Item과 Stack의 주소를 토대로 Stack에 Item을 가진 노드를 추가하는 역할만 하도록 만들어야함.
-    --> 이렇게 짜야지 stack.h에 있는 Item의 데이터형만 바꿔가면서 여러 프로그램에 적용 가능함. (utility up!!!)
-*/
-bool AddNode(Stack * pstack, Item si)            // 1. 전달인자 변경 
+bool Push(Stack * pstack, Item si)                                           //bool Push(Stack * pstack, Item si)로 이름변경    
 {
     Node * new_node;
     
     if ((new_node = makenode(si)) == NULL)     //여기서 새로운 노드를 만든다.
     {
-        puts("노드 만들기를 실패했습니다.");
+        fprintf(stderr, "노드 만들기를 실패했습니다.\n");
         return false;
     }
     if (StackIsFull(pstack))
     {
-        puts("스택에 빈자리가 없습니다.");
+        fprintf(stderr, "스택에 빈자리가 없습니다.\n");
         free(new_node);
         return false;
-    }                                                       // ********** line 53 ~ line 71 삭제해야함.
-    if (searching(pstack, si))                             //해당 코드는 유지.
+    }                                            
+    if (searching(pstack, si))                   
     {
-        puts("해당 숫자는 이미 저장되어 있습니다.");
+        fprintf(stderr, "해당 숫자는 이미 저장되어 있습니다.\n");
         free(new_node);
         return false;
     }
-    if (StackIsEmpty(pstack))           //추가하는 노드가 Head node.
-    {
-        puts("첫번째 노드를 성공적으로 추가하였습니다.");
-        pstack->head = new_node;
-        pstack->size++;
-    }
-    else
-    {
-        new_node->prev = pstack->head;            //새로만들어진 노드와 기존 노드를 연결
-        pstack->head = new_node;                  //Stack의 recnet멤버가 new_node를 가리키도록 갱신
-        pstack->size++;                             //Stack size 갱신
-        puts("노드를 성공적으로 만들었습니다.");
-    }
+    AddNode(pstack, new_node);                                                                                              
 
     return true;
 }
 
+void POP(Stack * pstack)
+{
+    Node * temp;                        
+
+    if (StackIsEmpty(pstack))
+    {
+        fpritnf(stderr, "Stack이 비어있습니다.\n");
+        return;
+    }
+    printf("%d\n", pstack->head);
+    temp = pstack->head;
+    pstack->head = pstack->head->prev;
+    free(temp);
+}
 
 
-
-/* ****** 10월 15일(일) -> 코드 오류 발견, 표시한 부분 코드 다시 뜯어보고 수정하기 ******* */ 
-/* ****** 11월 6일 (월) -> 코드 오류 개선함 ******** */
 bool DeleteNode(Stack * pstack, Item si)
 {
     Node * t_node;                          //target node
@@ -102,7 +94,7 @@ bool DeleteNode(Stack * pstack, Item si)
     
     if (!(t_node = searching(pstack, si)))
     {
-        puts("해당 정보를 저장하고 있는 노드가 존재하지 않습니다.");
+        fprintf(stderr, "해당 정보를 저장하고 있는 노드가 존재하지 않습니다.\n");
         return false;
     }
     /* 해당 정보를 저장하고 있는 노드가 존재함을 확인하면 */
@@ -148,7 +140,7 @@ void DeleteAll(Stack * pstack)                  //use recursion
  *      따라서 다른 함수 인터페이스들과의 일관ㅌ을 위해서 recursion이 아닌 다른 방법으로 DeleteAll()을 구현해야한다.
 */
 
-void ShowNode(Stack * pstack, Item si)
+void InStack(Stack * pstack, Item si)
 {
     Node * target;
 
@@ -241,11 +233,31 @@ static Node * makenode(Item si)             //si : stack item
     return new_node;
 }
 
+static bool AddNode(Stack * pstack, Node * new_node)
+{
+    if (StackIsEmpty(pstack))           //추가하는 노드가 Head node.
+    {
+        puts("첫번째 노드를 성공적으로 추가하였습니다.");
+        pstack->head = new_node;
+        pstack->size++;
+    }
+    else
+    {
+        new_node->prev = pstack->head;            //새로만들어진 노드와 기존 노드를 연결
+        pstack->head = new_node;                  //Stack의 recnet멤버가 new_node를 가리키도록 갱신
+        pstack->size++;                             //Stack size 갱신
+        puts("노드를 성공적으로 만들었습니다.");
+    } 
+    
+}
+
 inline static void empty()
 {
     while (getchar() != '\n')
         continue;
 }
+
+
 
 /* ***** 코드 개선 일지 ***** */
 /*
@@ -271,7 +283,15 @@ inline static void empty()
                 1. 다른 연산자와 마찬가지로 Stack의 주소를 전달인자로 받게하여서 다른 연산자들의 전달인자의 데이터형과 일관성을 띄게 한다.
                 2. 재귀 과정에 할당된 메모리를 해제함과 동시에 Stack size또한 갱신해야한다.
 ..     11/12 : DeleteAll() 수정 완료
+
+2023년 12/28 : Stack ADT연산 이름 변경 및 모듈화 수정사안.
+                1. 기존의 AddNode()를 Push()로 이름을 바꾸고 AddNode()를 내부지원 함수로 돌린다.
+                2. 이후에 POP연산을 구현한다. (맨 위의 것만 POP하는 것과 Stack 전체를 POP하는 연산 둘 다 구현한다.)
+                3. line 68 ~ line 79까지 하나로 묶어서 AddNode()내부지원 함수를 새로 만들어서 그걸로 대체
+                4. ShowNode()를 InStack()으로 이름변경
+                5. fprintf()이용해서 오류가 났을때 어디서 어떤 오류가 발생했는지 standard error stream을 이용해서 디스플레이에 표시하도록 함.
 */
+
 
 
 
